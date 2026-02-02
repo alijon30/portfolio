@@ -1,0 +1,114 @@
+/* About.css */
+.about-section {
+    padding: 100px 0;
+    background-color: var(--bg-secondary);
+}
+
+.about-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: center;
+}
+
+.about-image {
+    position: relative;
+}
+
+.about-img-placeholder {
+    width: 100%;
+    padding-bottom: 100%;
+    /* Square aspect ratio */
+    background: linear-gradient(135deg, var(--bg-accents) 0%, var(--primary-color) 100%);
+    border-radius: var(--radius-lg);
+    opacity: 0.1;
+    /* Placeholder opacity */
+}
+
+/* Actually, let's make a nicer placeholder using a div with dimensions */
+.about-img-frame {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background-color: var(--bg-accents);
+    border-radius: var(--radius-lg);
+    position: relative;
+    overflow: hidden;
+}
+
+.about-img-frame::after {
+    content: 'Profile Image';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--text-accent);
+}
+
+
+.about-text h2 {
+    font-size: 2.5rem;
+    margin-bottom: 24px;
+    color: var(--text-primary);
+}
+
+.about-text p {
+    margin-bottom: 24px;
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+}
+
+.stats {
+    display: flex;
+    gap: 32px;
+    margin-top: 40px;
+}
+
+.stat-item h3 {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    margin-bottom: 4px;
+}
+
+.stat-item p {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+
+/* Contact.css */
+.contact-section {
+    padding: 100px 0;
+    background-color: var(--bg-primary);
+    text-align: center;
+}
+
+.contact-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.contact-text {
+    margin-bottom: 40px;
+    color: var(--text-secondary);
+}
+
+/* Footer.css */
+.footer {
+    padding: 40px 0;
+    background-color: var(--bg-secondary);
+    border-top: 1px solid var(--bg-accents);
+    text-align: center;
+}
+
+.footer-text {
+    color: var(--text-accent);
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .about-container {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+}
