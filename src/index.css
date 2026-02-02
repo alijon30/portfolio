@@ -90,6 +90,12 @@ a {
   gap: 20px;
 }
 
+.header-note {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
 .theme-toggle {
   background: var(--bg-elevated);
   border: 1px solid var(--border);

@@ -55,9 +55,11 @@ function App() {
     <div className="portfolio">
       {/* Scroll Progress */}
       <div className="scroll-progress" style={{ width: `${scrollProgress}%` }} />
+
       {/* Header */}
       <header className="header">
         <div className="logo">Alijon K.</div>
+        <span className="header-note">Blogs coming soon</span>
         <div className="header-right">
           <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
             {theme === 'dark' ? '☀️' : '🌙'}
