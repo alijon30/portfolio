@@ -266,6 +266,7 @@ a {
 }
 
 .info-card {
+  position: relative;
   padding: 20px;
   background: var(--bg-elevated);
   border: 1px solid var(--border);
@@ -274,9 +275,73 @@ a {
   box-shadow: var(--shadow);
 }
 
+/* Partial accent bracket rather than a full green outline: an L of accent colour
+   hugging the card's own outward corner, so the four cards point out to the
+   corners of the grid. The radial mask is anchored to that same corner, so the
+   accent is solid where it meets the corner and fades as the lines run away
+   from it. Masking (rather than drawing gradient lines) keeps the bracket on
+   the 12px border-radius instead of cutting a straight line across the curve. */
+.info-card::after {
+  content: '';
+  position: absolute;
+  width: 100px;
+  height: 74px;
+  border: 2px solid var(--accent);
+  pointer-events: none;
+  transition: width 0.3s ease, height 0.3s ease;
+}
+
+/* top-left card */
+.info-card:nth-child(1)::after {
+  top: -1px;
+  left: -1px;
+  border-right: 0;
+  border-bottom: 0;
+  border-radius: 12px 0 0 0;
+  -webkit-mask-image: radial-gradient(ellipse at top left, #000 0%, #000 22%, transparent 100%);
+  mask-image: radial-gradient(ellipse at top left, #000 0%, #000 22%, transparent 100%);
+}
+
+/* top-right card */
+.info-card:nth-child(2)::after {
+  top: -1px;
+  right: -1px;
+  border-left: 0;
+  border-bottom: 0;
+  border-radius: 0 12px 0 0;
+  -webkit-mask-image: radial-gradient(ellipse at top right, #000 0%, #000 22%, transparent 100%);
+  mask-image: radial-gradient(ellipse at top right, #000 0%, #000 22%, transparent 100%);
+}
+
+/* bottom-left card */
+.info-card:nth-child(3)::after {
+  bottom: -1px;
+  left: -1px;
+  border-right: 0;
+  border-top: 0;
+  border-radius: 0 0 0 12px;
+  -webkit-mask-image: radial-gradient(ellipse at bottom left, #000 0%, #000 22%, transparent 100%);
+  mask-image: radial-gradient(ellipse at bottom left, #000 0%, #000 22%, transparent 100%);
+}
+
+/* bottom-right card */
+.info-card:nth-child(4)::after {
+  bottom: -1px;
+  right: -1px;
+  border-left: 0;
+  border-top: 0;
+  border-radius: 0 0 12px 0;
+  -webkit-mask-image: radial-gradient(ellipse at bottom right, #000 0%, #000 22%, transparent 100%);
+  mask-image: radial-gradient(ellipse at bottom right, #000 0%, #000 22%, transparent 100%);
+}
+
 .info-card:hover {
-  border-color: var(--accent);
   transform: translateY(-2px);
+}
+
+.info-card:hover::after {
+  width: 132px;
+  height: 88px;
 }
 
 .card-label {
@@ -316,8 +381,185 @@ a {
 }
 
 /* Work Section - Long-form Editorial */
+
+/* The case studies read as an editorial column: a fixed measure centred in the
+   page, rather than a capped paragraph left-aligned inside a 1400px container,
+   which stranded ~500px of dead margin on the right at laptop widths. Widens
+   modestly on large monitors — but not to the full container, since line length
+   past ~110 characters gets hard to track. */
 .work-section {
-  margin-bottom: 48px;
+  max-width: clamp(820px, 64vw, 1080px);
+  margin: 0 auto 48px;
+}
+
+/* Experience rail — fixed to the far-left gutter, outside the content column.
+   Collapsed it is just a progress track with a dot per employer; hovering
+   expands it into a labelled timeline.
+
+   The 1440px floor is geometry, not taste: .portfolio is max-width 1400 with
+   clamp(16px,4vw,48px) padding, so content only clears the collapsed rail's
+   58px right edge once the viewport exceeds ~1420px. Below that the rail
+   would sit on top of the page, so it is hidden. */
+.xp-rail {
+  display: none;
+}
+
+@media (min-width: 1440px) {
+  .xp-rail {
+    display: block;
+    position: fixed;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    z-index: 900;
+    padding: 16px 14px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .xp-rail:hover,
+  .xp-rail:focus-within {
+    background: var(--bg-elevated);
+    border-color: var(--border);
+    box-shadow: var(--shadow);
+  }
+
+  /* The rail is focusable so keyboard users can expand it; the panel itself is
+     the focus indicator, so suppress the default ring and mark the edge. */
+  .xp-rail:focus-visible {
+    outline: none;
+    border-color: var(--accent);
+  }
+}
+
+.xp-rail-title {
+  height: 0;
+  margin-bottom: 0;
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  opacity: 0;
+  transition: opacity 0.25s ease, height 0.25s ease, margin-bottom 0.25s ease;
+}
+
+.xp-rail:hover .xp-rail-title,
+.xp-rail:focus-within .xp-rail-title {
+  height: 14px;
+  margin-bottom: 14px;
+  opacity: 1;
+}
+
+.xp-list {
+  position: relative;
+  margin: 0;
+  padding: 2px 0 2px 16px;
+  list-style: none;
+}
+
+/* Scroll progress: the track fills as the page scrolls */
+.xp-track {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 0;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.xp-track-fill {
+  display: block;
+  width: 100%;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--accent), var(--accent-dim));
+  transition: height 0.1s ease;
+}
+
+.xp-group {
+  position: relative;
+}
+
+.xp-group + .xp-group {
+  margin-top: 18px;
+}
+
+.xp-dot {
+  position: absolute;
+  top: 4px;
+  left: -20px;
+  width: 9px;
+  height: 9px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--bg);
+}
+
+.xp-dot.current {
+  border-color: var(--accent);
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.xp-labels {
+  max-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  opacity: 0;
+  transition: max-width 0.25s ease, opacity 0.25s ease;
+}
+
+.xp-rail:hover .xp-labels,
+.xp-rail:focus-within .xp-labels {
+  max-width: 230px;
+  opacity: 1;
+}
+
+.xp-company {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text);
+}
+
+.xp-role {
+  display: flex;
+  flex-direction: column;
+  margin-top: 3px;
+}
+
+.xp-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.xp-date {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Wide screens: the gutter is finally big enough to hold the labels permanently,
+   so stop hiding them. 1900px is the first width where the expanded rail's 268px
+   right edge clears the content column — margin (1900-1400)/2 = 250, plus 48px
+   padding, puts content at x=298. Below this the rail stays collapsed and the
+   hover rules above do the work. */
+@media (min-width: 1920px) {
+  .xp-rail-title {
+    height: 14px;
+    margin-bottom: 14px;
+    opacity: 1;
+  }
+
+  .xp-labels {
+    max-width: 230px;
+    opacity: 1;
+  }
 }
 
 .work-item {
@@ -340,10 +582,20 @@ a {
   color: var(--text);
 }
 
+/* The role line is the first thing a reader looks for, so it gets an accent pill
+   rather than muted grey running alongside the project title. */
 .work-meta {
-  font-size: 14px;
-  color: var(--text-muted);
-  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--accent-glow);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--accent);
+  white-space: nowrap;
 }
 
 .work-meta a {
@@ -360,7 +612,7 @@ a {
   font-size: 16px;
   color: var(--text-secondary);
   line-height: 1.85;
-  max-width: 820px;
+  max-width: 100%;
   margin-bottom: 18px;
   font-weight: 500;
 }
@@ -606,6 +858,38 @@ a {
   background: var(--text-muted);
 }
 
+.github-account + .github-account {
+  margin-top: 28px;
+  padding-top: 28px;
+  border-top: 1px solid var(--border);
+}
+
+.github-account-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.github-account-label {
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.github-account-name {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
 .github-link {
   display: inline-flex;
   align-items: center;
@@ -832,5 +1116,665 @@ a {
 
   .social-links {
     justify-content: center;
+  }
+}
+
+/* Blog Styles */
+.blog-container {
+  max-width: 800px;
+  margin: 0 auto;
+  min-height: 60vh;
+}
+
+.blog-header {
+  margin-bottom: 40px;
+}
+
+.blog-page-title {
+  font-family: 'Quicksand', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 6px;
+}
+
+.posts-by-month {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.month-group {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.month-label {
+  font-family: 'Quicksand', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.posts-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.blog-card {
+  padding: 32px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow);
+}
+
+.blog-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+}
+
+.blog-card-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.blog-category {
+  color: var(--accent);
+}
+
+.blog-title-link {
+  display: block;
+}
+
+.blog-title {
+  font-family: 'Quicksand', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 12px;
+  line-height: 1.3;
+  transition: color 0.2s ease;
+}
+
+.blog-title-link:hover .blog-title {
+  color: var(--accent);
+}
+
+.blog-excerpt {
+  font-size: 16px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.read-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+  transition: gap 0.2s ease;
+}
+
+.read-more:hover {
+  gap: 10px;
+}
+
+/* Article Page */
+.article-page {
+  display: block;
+  padding-bottom: 80px;
+}
+
+.article-page-inner {
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.article-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 40px;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-elevated);
+  transition: all 0.2s;
+}
+
+.article-back:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.article-page-header {
+  margin-bottom: 40px;
+}
+
+.article-page-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+.article-page-category {
+  color: var(--accent);
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.article-page-dot {
+  color: var(--text-muted);
+}
+
+.article-page-title {
+  font-family: 'Quicksand', sans-serif;
+  font-size: clamp(32px, 5vw, 44px);
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--text);
+  margin: 0 0 16px;
+}
+
+.article-page-subtitle {
+  font-family: 'Georgia', 'Charter', serif;
+  font-size: 20px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.article-page-divider {
+  width: 100%;
+  height: 1px;
+  background: var(--border);
+  margin-bottom: 40px;
+}
+
+/* Article Body Styles (HTML content from editor) */
+.article-body {
+  font-family: 'Georgia', 'Charter', serif;
+  font-size: 19px;
+  line-height: 1.8;
+  color: var(--text-secondary);
+}
+
+.article-body h1,
+.article-body h2,
+.article-body h3,
+.article-body h4 {
+  font-family: 'Quicksand', sans-serif;
+  color: var(--text);
+  margin-top: 48px;
+  margin-bottom: 16px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.article-body h1 {
+  font-size: 32px;
+}
+
+.article-body h2 {
+  font-size: 26px;
+}
+
+.article-body h3 {
+  font-size: 22px;
+}
+
+.article-body p {
+  margin-bottom: 24px;
+}
+
+.article-body a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.article-body ul,
+.article-body ol {
+  margin-bottom: 24px;
+  padding-left: 24px;
+}
+
+.article-body li {
+  margin-bottom: 8px;
+}
+
+.article-body blockquote {
+  border-left: 4px solid var(--accent);
+  padding-left: 20px;
+  font-style: italic;
+  color: var(--text-muted);
+  margin: 32px 0;
+  font-size: 20px;
+}
+
+.article-body code {
+  font-family: 'Fira Code', 'JetBrains Mono', monospace;
+  font-size: 0.88em;
+  padding: 2px 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  color: var(--accent);
+}
+
+.article-body pre {
+  background: #1a1a2e;
+  padding: 20px 24px;
+  border-radius: 12px;
+  overflow-x: auto;
+  margin: 32px 0;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.article-body pre code {
+  background: transparent;
+  padding: 0;
+  color: #e0e0e0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.article-body img {
+  max-width: 100%;
+  border-radius: 12px;
+  margin: 32px 0;
+  display: block;
+}
+
+.article-body hr {
+  border: none;
+  text-align: center;
+  margin: 48px 0;
+}
+
+.article-body hr::before {
+  content: '...';
+  font-size: 28px;
+  letter-spacing: 0.6em;
+  color: var(--text-muted);
+}
+
+.article-body u {
+  text-underline-offset: 3px;
+}
+
+/* Syntax highlighting for HTML code blocks */
+.article-body pre .hljs-comment,
+.article-body pre .hljs-quote { color: #6a737d; }
+.article-body pre .hljs-keyword,
+.article-body pre .hljs-selector-tag { color: #ff7b72; }
+.article-body pre .hljs-string,
+.article-body pre .hljs-addition { color: #a5d6ff; }
+.article-body pre .hljs-number { color: #79c0ff; }
+.article-body pre .hljs-built_in { color: #ffa657; }
+.article-body pre .hljs-function .hljs-title { color: #d2a8ff; }
+.article-body pre .hljs-attr { color: #79c0ff; }
+.article-body pre .hljs-variable { color: #ffa657; }
+.article-body pre .hljs-type { color: #ff7b72; }
+
+/* Legacy Markdown Styles (backward compat for old posts) */
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4 {
+  font-family: 'Quicksand', sans-serif;
+  color: var(--text);
+  margin-top: 48px;
+  margin-bottom: 16px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.markdown-body h2 {
+  font-size: 28px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+}
+
+.markdown-body h3 {
+  font-size: 22px;
+}
+
+.markdown-body p {
+  margin-bottom: 24px;
+}
+
+.markdown-body a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  margin-bottom: 24px;
+  padding-left: 24px;
+}
+
+.markdown-body li {
+  margin-bottom: 8px;
+}
+
+.markdown-body blockquote {
+  border-left: 4px solid var(--accent);
+  padding-left: 20px;
+  font-style: italic;
+  color: var(--text-muted);
+  margin: 32px 0;
+}
+
+.markdown-body code {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.9em;
+  padding: 2px 6px;
+  background: var(--bg-elevated);
+  border-radius: 4px;
+  color: var(--accent);
+}
+
+.markdown-body pre {
+  background: #1e1e1e;
+  padding: 20px;
+  border-radius: 12px;
+  overflow-x: auto;
+  margin: 32px 0;
+  border: 1px solid var(--border);
+}
+
+.markdown-body pre code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  font-size: 14px;
+}
+
+.markdown-body img {
+  max-width: 100%;
+  border-radius: 12px;
+  margin: 32px 0;
+}
+
+/* Layout Refinement */
+.blog-category-section {
+  margin-bottom: 64px;
+}
+
+.category-title {
+  font-family: 'Quicksand', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+  text-transform: capitalize;
+  letter-spacing: -0.02em;
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+/* Updated Card Styles */
+.blog-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 24px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.blog-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--accent);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+.blog-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.blog-card:hover::before {
+  opacity: 1;
+}
+
+.blog-card-meta {
+  margin-bottom: 16px;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  opacity: 0.7;
+}
+
+.blog-title {
+  font-size: 20px;
+  line-height: 1.4;
+  margin-bottom: 12px;
+  flex-grow: 0;
+}
+
+.blog-excerpt {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  flex-grow: 1;
+  /* Push read more to bottom */
+  margin-bottom: 24px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.read-more {
+  margin-top: auto;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Blog Layout */
+.blog-layout {
+  display: flex !important;
+  /* Override .main grid */
+  gap: 48px;
+  align-items: flex-start;
+  position: relative;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.blog-sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 40px;
+  padding-right: 24px;
+  border-right: 1px solid var(--border);
+  min-height: calc(100vh - 200px);
+}
+
+.sidebar-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar-title {
+  font-family: 'Quicksand', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.category-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.category-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.category-item:hover {
+  background: var(--bg-elevated);
+  color: var(--text);
+}
+
+.category-item.active {
+  background: var(--accent-glow);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.category-icon {
+  font-size: 18px;
+  opacity: 0.7;
+}
+
+.category-item.active .category-icon {
+  opacity: 1;
+}
+
+.count {
+  margin-left: auto;
+  font-size: 12px;
+  background: var(--bg-elevated);
+  padding: 2px 8px;
+  border-radius: 12px;
+  color: var(--text-muted);
+}
+
+.category-item.active .count {
+  background: rgba(0, 255, 136, 0.2);
+  color: var(--accent);
+}
+
+.category-divider {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 16px 0 8px 12px;
+}
+
+.blog-main {
+  flex: 1;
+  min-width: 0;
+  /* Prevent flex child overflow */
+}
+
+.posts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.blog-header {
+  margin-bottom: 40px;
+}
+
+/* Responsive Blog Layout */
+@media (max-width: 850px) {
+  .blog-layout {
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .blog-sidebar {
+    width: 100%;
+    position: static;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding-right: 0;
+    padding-bottom: 24px;
+    min-height: auto;
+  }
+
+  .sidebar-header {
+    display: none;
+  }
+
+  .category-nav {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .category-item {
+    width: auto;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    padding: 8px 16px;
+  }
+
+  .category-item.active {
+    border-color: var(--accent);
+  }
+
+  .category-divider {
+    display: none;
   }
 }
